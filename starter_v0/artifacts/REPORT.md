@@ -52,13 +52,8 @@ total_cases`, và tool result error đã được review thủ công.
 |---|---|---|---|---:|---:|---|
 | v0 | baseline | Chạy bản starter chưa sửa để lấy lỗi gốc. | case_accuracy / wrong_tool failures |  | 0.70 / 3 | `runs/v0_B_base_openrouter_20260915T194643913280.json` |
 | v1 | Sửa `artifacts/tools.yaml`: làm rõ ranh giới `check_service_status`, `inspect_device`, `lookup_user`, `search_kb`, `format_incident_report`; chuyển description sang tiếng Việt để khớp ngôn ngữ eval. Không sửa `system_prompt.md`. | Nếu tool description nêu rõ service-wide vs asset-specific vs employee directory và yêu cầu `check` cụ thể, agent sẽ giảm chọn nhầm tool và nhầm argument do routing. | case_accuracy / wrong_tool failures | 0.70 / 3 | 0.80 / 0 | `runs/v1_B_base_openrouter_20260915T195624602380.json` |
-| v2 | Sửa `artifacts/system_prompt.md`: thêm luật hỏi lại khi thiếu asset ID, thiếu employee ID hoặc environment không thuộc enum; giữ nguyên `tools.yaml` v1. | Nếu prompt cấm đoán asset/employee/environment và bắt dùng `clarify` cho input thiếu hoặc mơ hồ, agent sẽ không gọi tool downstream bằng dữ liệu tự suy đoán. | case_accuracy / missing_info failures | 0.80 / 3 | 0.90 / 0 | `runs/v2_B_base_openrouter_20260915T201056362998.json` |
-| v3 |  |  |  |  |  |  |
-
-Ghi chú v1: run hợp lệ theo điều kiện của README (`provider_error_cases == 0`,
-`measured_cases == total_cases == 30`). Sau v1 vẫn còn 6 lỗi: `missing_info` = 3
-và `wrong_boundary` = 3. Sau v2, `missing_info` đã về 0; còn 3 lỗi
-`wrong_boundary`
+| v2 | Sửa `artifacts/system_prompt.md`: thêm luật hỏi lại khi thiếu asset ID, thiếu employee ID hoặc environment không thuộc enum; giữ nguyên `tools.yaml` v1. | Nếu prompt cấm đoán asset/employee/environment và bắt dùng `clarify` cho input thiếu hoặc mơ hồ, agent sẽ không gọi tool downstream bằng dữ liệu tự suy đoán. | case_accuracy / missing_info failures | 0.80 / 3 | 0.90 / 0 | `runs/v2_B_base_openrouter_20260915T201402683183.json` |
+| v3 | Sửa `artifacts/system_prompt.md`: thêm ranh giới ticket, bắt xác nhận payload hiện tại bằng `clarify(yes_no)` trước khi tạo ticket; confirmation cũ mất hiệu lực khi payload đổi. | Nếu `create_ticket` chỉ được xem là hành động cuối sau xác nhận rõ payload mới nhất, agent sẽ không tạo ticket hoặc gọi tool phụ khi người dùng chỉ yêu cầu xem lại/xác nhận. | case_accuracy / wrong_boundary failures | 0.90 / 3 | 1.00 / 0 | `runs/v3_B_base_openrouter_20260915T202535005106.json` |
 
 ## B2. Failure analysis
 
@@ -70,6 +65,9 @@ và `wrong_boundary` = 3. Sau v2, `missing_info` đã về 0; còn 3 lỗi
 | H10_missing_asset | missing_info | v1 gọi `search_kb({"query":"Wi-Fi","category":"wifi"})`. | User chỉ nói "laptop của mình", chưa có asset ID cụ thể nên không đủ input để inspect device. | Trong `system_prompt.md`, thêm luật device diagnostic phải có asset ID cụ thể; nếu chỉ có thiết bị chung chung thì gọi `clarify(response_type="text")`. Kết quả v2: case pass. |
 | H11_missing_employee | missing_info | v1 gọi `lookup_user({"employee_id":"EMP-1003"})`. | User chỉ nói nhân viên bên Sales, agent tự đoán employee ID. | Trong `system_prompt.md`, thêm luật lookup tài khoản phải có mã EMP-* cụ thể; nếu chỉ có phòng ban/vai trò thì gọi `clarify(response_type="text")`. Kết quả v2: case pass. |
 | H19_ambiguous_environment | missing_info | v1 gọi `check_service_status({"service":"email","environment":"staging"})`. | User nói môi trường demo của QA, không thuộc enum `production`/`staging`; agent tự map sang staging. | Trong `system_prompt.md`, thêm luật nếu environment là demo/QA/test/sandbox thì hỏi chọn `production` hoặc `staging` bằng `clarify(response_type="choice")`. Kết quả v2: case pass. |
+| H12_confirm_before_ticket | wrong_boundary | v2 gọi `inspect_device({"asset_id":"LT-204","check":"vpn"})` rồi `create_ticket(...,"confirmed":true)`. | User yêu cầu tạo ticket nhưng chưa xác nhận payload hiện tại; agent vừa chẩn đoán vừa tạo ticket. | Trong `system_prompt.md`, thêm luật `create_ticket` là hành động cuối và phải hỏi xác nhận payload bằng `clarify(response_type="yes_no")` trước. Kết quả v3: case pass. |
+| M05_ticket_confirmation | wrong_boundary | v2 gọi `create_ticket(...,"confirmed":false)` và `lookup_user({"employee_id":"EMP-1003"})`. | Lượt mới nhất yêu cầu xem lại và hỏi xác nhận trước, nhưng agent tạo ticket/gọi tool phụ thay vì hỏi xác nhận. | Thêm luật nếu latest turn nói "xem lại", "rà lại", "review" hoặc "hỏi xác nhận trước" thì chỉ gọi `clarify(yes_no)`, không gọi `create_ticket` hay tool khác. Kết quả v3: case pass. |
+| M09_confirmation_invalidated | wrong_boundary | v2 gọi `create_ticket(...,"priority":"critical","confirmed":true)`. | Confirmation cũ bị payload mới làm mất hiệu lực, nhưng agent vẫn tạo ticket. | Thêm luật confirmation cũ mất hiệu lực khi summary/priority/asset/impact/nội dung đổi; phải hỏi xác nhận lại payload mới. Kết quả v3: case pass. |
 
 ## B3. Team eval cases
 
@@ -119,7 +117,7 @@ nhóm tự xây.
 - Fix v1 không sửa `system_prompt.md`; prompt vẫn là starter để cô lập tác động của tool declaration.
 - Fix v1 thuộc `tools.yaml`: mô tả rõ ranh giới giữa service status, device inspection, user lookup, KB search, report formatting, policy và ticket creation; đồng thời dùng tiếng Việt để khớp ngôn ngữ case eval.
 - Không thể chỉ nhìn automatic score: routing PASS chưa đủ nếu tool result trả lỗi hoặc gọi dư tool. Ví dụ v0 ở H04 gọi thêm `inspect_device` với `asset_id="EMP-1003"` và tool trả `asset_not_found`; cần đọc cả `actual_tool_calls` và `tool_results`.
-- Vòng tiếp theo nên xử lý `wrong_boundary`: ticket không được tạo trước khi xác nhận payload hiện tại; confirmation cũ phải mất hiệu lực khi user đổi summary/priority/impact.
+- V3 xử lý `wrong_boundary` trong `system_prompt.md`: ticket không được tạo trước khi xác nhận payload hiện tại; confirmation cũ mất hiệu lực khi user đổi summary/priority/impact. Run v3 đạt 30/30 base cases.
 
 # PHẦN C — Checkout trước khi nộp
 

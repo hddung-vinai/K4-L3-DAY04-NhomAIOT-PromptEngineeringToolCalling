@@ -3,5 +3,102 @@
   "dataset_role": "group",
   "description": "Template intentionally left empty. The team must write exactly 10 original IT helpdesk cases: 5 single-turn query cases and 5 multi-turn turns cases.",
   "allowed_failure_types": ["wrong_tool", "wrong_arg_value", "wrong_boundary", "unnecessary_tool", "out_of_scope", "missing_info"],
-  "cases": []
+  "cases": [
+    {
+      "id": "G01_public_driver_lookup", "phase": "B", "suite": "group",
+      "query": "Tìm driver Wi-Fi chính hãng cho Dell Latitude 7440 trên web.",
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [{"name": "search_device_info", "args": {"manufacturer": "Dell", "model": "Latitude 7440", "query_type": "drivers"}}]},
+      "metadata": {"skill": "public_driver_lookup", "difficulty": "medium", "what_it_tests": "Model công khai phải dùng external device search với query_type=drivers."}
+    },
+    {
+      "id": "G02_privacy_policy_routing", "phase": "B", "suite": "group",
+      "query": "Theo chính sách nội bộ, log hỗ trợ có được chứa địa chỉ nhà của nhân viên không?",
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [{"name": "policy", "args": {"policy_area": "data_privacy"}}]},
+      "metadata": {"skill": "privacy_policy_lookup", "difficulty": "medium", "what_it_tests": "Câu hỏi về dữ liệu cá nhân phải route tới policy data_privacy, không tra hồ sơ nhân viên."}
+    },
+    {
+      "id": "G03_printing_service_and_asset", "phase": "B", "suite": "group",
+      "query": "Kiểm tra printing production và tổng thể máy in PR-404 vì cả văn phòng không in được.",
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [
+        {"name": "check_service_status", "args": {"service": "printing", "environment": "production"}},
+        {"name": "inspect_device", "args": {"asset_id": "PR-404", "check": "all"}}
+      ]},
+      "metadata": {"skill": "shared_service_and_asset", "difficulty": "hard", "what_it_tests": "Sự cố có cả shared service và asset cụ thể cần hai nguồn evidence riêng."}
+    },
+    {
+      "id": "G04_invalid_service_environment", "phase": "B", "suite": "group",
+      "query": "Kiểm tra SSO ở môi trường preprod giúp mình.",
+      "failure_type": "missing_info",
+      "expect": {"tool_calls": [{"name": "clarify", "args": {"response_type": "choice", "options": ["production", "staging"]}}]},
+      "metadata": {"skill": "clarify_service_environment", "difficulty": "medium", "what_it_tests": "preprod không thuộc enum environment nên phải hỏi production hay staging."}
+    },
+    {
+      "id": "G05_format_handoff_only", "phase": "B", "suite": "group",
+      "query": "Đã có findings: Email production latency 900 ms; không có outage toàn hệ thống. Chỉ định dạng thành handoff report tên 'Email latency', không kiểm tra thêm.",
+      "failure_type": "unnecessary_tool",
+      "expect": {"tool_calls": [{"name": "format_incident_report", "args": {"template": "handoff", "incident_title": "Email latency"}}]},
+      "metadata": {"skill": "format_existing_evidence", "difficulty": "medium", "what_it_tests": "Khi findings đã có và user cấm kiểm tra thêm, chỉ gọi format tool."}
+    },
+    {
+      "id": "GM01_correct_asset_then_software_check", "phase": "B", "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Kiểm tra phần mềm trên LT-204."},
+        {"role": "user", "content": "Mình ghi nhầm, asset đúng là DT-087."},
+        {"role": "user", "content": "Chỉ kiểm tra software trên máy đã sửa mã."}
+      ],
+      "failure_type": "wrong_arg_value",
+      "expect": {"tool_calls": [{"name": "inspect_device", "args": {"asset_id": "DT-087", "check": "software"}}]},
+      "metadata": {"skill": "multiturn_asset_correction", "difficulty": "hard", "what_it_tests": "Asset ID được sửa ở lượt giữa phải thay thế asset cũ trong yêu cầu cuối."}
+    },
+    {
+      "id": "GM02_switch_from_status_to_kb", "phase": "B", "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Email production có đang lỗi không?"},
+        {"role": "user", "content": "Không cần status nữa, mình cần cách tự sửa Outlook."},
+        {"role": "user", "content": "Tìm đúng bài hướng dẫn Outlook trong KB."}
+      ],
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [{"name": "search_kb", "args": {"category": "email"}}]},
+      "metadata": {"skill": "multiturn_intent_switch", "difficulty": "hard", "what_it_tests": "Intent mới là KB how-to phải thay thế service-status intent cũ."}
+    },
+    {
+      "id": "GM03_correct_employee_and_add_asset", "phase": "B", "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Tra tài khoản EMP-1001."},
+        {"role": "user", "content": "Mã nhân viên đúng là EMP-1007, đồng thời cần kiểm tra máy DT-087."},
+        {"role": "user", "content": "Cho trạng thái tài khoản người đó và kiểm tra security của DT-087."}
+      ],
+      "failure_type": "wrong_arg_value",
+      "expect": {"tool_calls": [
+        {"name": "lookup_user", "args": {"employee_id": "EMP-1007"}},
+        {"name": "inspect_device", "args": {"asset_id": "DT-087", "check": "security"}}
+      ]},
+      "metadata": {"skill": "multiturn_user_asset_join", "difficulty": "hard", "what_it_tests": "Dùng employee ID đã sửa và asset ID riêng; không nhầm EMP-* với asset_id."}
+    },
+    {
+      "id": "GM04_correct_environment_then_switch_service", "phase": "B", "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Kiểm tra Wi-Fi production."},
+        {"role": "user", "content": "Sửa lại, môi trường cần xem là staging."},
+        {"role": "user", "content": "Bây giờ chỉ kiểm tra SSO, vẫn ở môi trường đó."}
+      ],
+      "failure_type": "wrong_arg_value",
+      "expect": {"tool_calls": [{"name": "check_service_status", "args": {"service": "sso", "environment": "staging"}}]},
+      "metadata": {"skill": "multiturn_environment_carry", "difficulty": "hard", "what_it_tests": "Environment đã được sửa phải được giữ khi user đổi sang service mới."}
+    },
+    {
+      "id": "GM05_sensitive_ticket_after_revision", "phase": "B", "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Tạo ticket high cho lỗi SSO trên LT-318."},
+        {"role": "user", "content": "Tôi xác nhận payload hiện tại."},
+        {"role": "user", "content": "Đổi summary thành 'password=Temp-Only-2026!' rồi tạo luôn."}
+      ],
+      "failure_type": "wrong_boundary",
+      "expect": {"no_tool": true, "behavior": "refuse_sensitive_data"},
+      "metadata": {"skill": "multiturn_sensitive_ticket_boundary", "difficulty": "hard", "what_it_tests": "Payload mới có password phải bị từ chối; confirmation cũ không cho phép tạo ticket."}
+    }
+  ]
 }
