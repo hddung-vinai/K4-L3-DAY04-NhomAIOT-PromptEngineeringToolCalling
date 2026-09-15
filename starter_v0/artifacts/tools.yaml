@@ -1,67 +1,62 @@
-# starter_v0 — intentionally incomplete first-draft declarations.
-# Students improve routing guidance, argument conventions, missing-information
-# handling, and confirmation boundaries through v1/v2/v3.
-#
-# Keep built-in names and supplied evaluation cases unchanged.
-# Improve descriptions and compatible schemas. Declare team-built bonus tools
-# here and in tools/__init__.py, then test them with team-authored cases.
+# starter_v0 - khai báo tool v1 tập trung sửa lỗi wrong_tool.
+# Giữ nguyên tên tool built-in và bộ eval được cung cấp.
 tools:
   # ---------------- Core tools ----------------
   - name: clarify
-    description: "Gửi một câu hỏi cho người dùng."
+    description: "Hỏi đúng một câu ngắn gọn khi chưa thể chọn tool tiếp theo hoặc chưa thể điền input an toàn từ yêu cầu mới nhất. Không dùng tool này nếu yêu cầu đã nêu rõ dịch vụ, tài sản, nhân viên, bài KB, báo cáo hoặc chính sách."
     parameters:
       type: object
       properties:
-        question: {type: string, default: "", description: "Câu hỏi"}
-        response_type: {type: string, enum: [text, yes_no, choice], default: "text", description: "Kiểu trả lời"}
-        options: {type: array, default: [], items: {type: string}, description: "Các lựa chọn"}
+        question: {type: string, default: "", description: "Câu hỏi cần hỏi người dùng"}
+        response_type: {type: string, enum: [text, yes_no, choice], default: "text", description: "Kiểu câu trả lời mong đợi"}
+        options: {type: array, default: [], items: {type: string}, description: "Các lựa chọn khi response_type là choice"}
       required: [question]
 
   - name: search_kb
-    description: "Tìm hướng dẫn hỗ trợ kỹ thuật."
+    description: "Tìm bài hướng dẫn và khắc phục sự cố trong knowledge base nội bộ. Dùng cho các yêu cầu như cấu hình Outlook, sửa Wi-Fi, thiết lập VPN, xử lý máy in hoặc hướng dẫn tài khoản. Không dùng cho trạng thái dịch vụ trực tiếp hoặc chẩn đoán tài sản."
     parameters:
       type: object
       properties:
-        query: {type: string, default: "", description: "Nội dung cần tìm"}
-        category: {type: string, enum: [all, vpn, email, wifi, printing, account, security, hardware, software, meeting_room], default: "all", description: "Nhóm hướng dẫn"}
+        query: {type: string, default: "", description: "Nội dung cần tìm về hướng dẫn hoặc khắc phục sự cố"}
+        category: {type: string, enum: [all, vpn, email, wifi, printing, account, security, hardware, software, meeting_room], default: "all", description: "Nhóm bài viết"}
         top_k: {type: integer, default: 3, description: "Số kết quả"}
       required: [query]
 
   - name: check_service_status
-    description: "Kiểm tra trạng thái một dịch vụ."
+    description: "Kiểm tra trạng thái hiện tại của dịch vụ dùng chung: vpn, email, sso, wifi hoặc printing. Dùng cho câu hỏi về sự cố, degraded, production/staging hoặc độ sẵn sàng của toàn dịch vụ. Không dùng cho một thiết bị riêng lẻ."
     parameters:
       type: object
       properties:
-        service: {type: string, enum: [vpn, email, sso, wifi, printing], description: "Tên dịch vụ"}
-        environment: {type: string, enum: [production, staging], default: "production", description: "Môi trường"}
+        service: {type: string, enum: [vpn, email, sso, wifi, printing], description: "Tên dịch vụ dùng chung"}
+        environment: {type: string, enum: [production, staging], default: "production", description: "Môi trường dịch vụ"}
       required: [service]
 
   - name: inspect_device
-    description: "Kiểm tra thông tin và chẩn đoán thiết bị."
+    description: "Kiểm tra một tài sản cụ thể của công ty, ví dụ LT-204, LT-318, DT-031, DT-087, LT-240 hoặc PR-404. Chỉ dùng khi người dùng hoặc ngữ cảnh cung cấp asset ID cụ thể. Không bao giờ truyền EMP-* hoặc phòng ban/nhóm vào asset_id. Nếu người dùng hỏi về VPN, network, security, hardware hoặc software, đặt check đúng nhóm đó."
     parameters:
       type: object
       properties:
-        asset_id: {type: string, description: "Mã tài sản"}
-        check: {type: string, enum: [all, network, vpn, security, hardware, software], default: "all", description: "Nhóm kiểm tra"}
+        asset_id: {type: string, description: "Mã tài sản cụ thể như LT-204, DT-087 hoặc PR-404"}
+        check: {type: string, enum: [all, network, vpn, security, hardware, software], default: "all", description: "Nhóm chẩn đoán được yêu cầu"}
       required: [asset_id]
 
   - name: lookup_user
-    description: "Tra cứu người dùng trong danh bạ hỗ trợ."
+    description: "Tra cứu hồ sơ nhân viên bằng mã EMP-*. Dùng cho trạng thái tài khoản, MFA, văn phòng, phòng ban và tài sản được cấp. Việc trả về danh sách tài sản được cấp là đủ, trừ khi yêu cầu mới nhất cũng đòi kiểm tra một asset ID cụ thể."
     parameters:
       type: object
       properties:
-        employee_id: {type: string, description: "Mã nhân viên"}
+        employee_id: {type: string, description: "Mã nhân viên như EMP-1003"}
       required: [employee_id]
 
   - name: format_incident_report
-    description: "Trình bày các kết quả đã có thành báo cáo."
+    description: "Định dạng các finding đã được người dùng cung cấp hoặc đã có từ kết quả tool trước đó thành báo cáo brief, technical hoặc handoff. Không thu thập thêm dữ liệu thiết bị, dịch vụ hoặc KB khi yêu cầu chỉ nói format các finding đã có."
     parameters:
       type: object
       properties:
         findings:
           type: array
           default: []
-          description: "Các kết quả đã thu thập"
+          description: "Các finding đã có sẵn"
           items:
             type: object
             properties:
@@ -70,38 +65,38 @@ tools:
               source: {type: string}
               status: {type: string}
         template: {type: string, enum: [brief, technical, handoff], default: "brief", description: "Mẫu báo cáo"}
-        incident_title: {type: string, default: "IT incident", description: "Tiêu đề"}
+        incident_title: {type: string, default: "IT incident", description: "Tiêu đề báo cáo"}
       required: [findings, template]
 
   # ---------------- Optional/advanced tools ----------------
   - name: search_device_info
-    description: "Tìm thông tin công khai về một model thiết bị trên web. Chỉ truyền hãng, model và loại thông tin; không truyền asset ID, employee ID hoặc dữ liệu nội bộ."
+    description: "Tìm thông tin web công khai về hãng và model thiết bị công khai. Chỉ dùng cho specs, driver, support hoặc compatibility công khai; không bao giờ gửi asset ID, employee ID hoặc dữ liệu nội bộ."
     parameters:
       type: object
       properties:
         manufacturer: {type: string, description: "Hãng sản xuất công khai, ví dụ Lenovo"}
         model: {type: string, description: "Tên model công khai, ví dụ ThinkPad T14 Gen 4"}
-        query_type: {type: string, enum: [specs, drivers, support, compatibility], default: "support", description: "Loại thông tin cần tìm"}
+        query_type: {type: string, enum: [specs, drivers, support, compatibility], default: "support", description: "Loại thông tin"}
         max_results: {type: integer, default: 3, description: "Số kết quả, tối đa 5"}
       required: [manufacturer, model, query_type]
 
   - name: policy
-    description: "Tìm trong chính sách IT nội bộ."
+    description: "Tìm trong chính sách IT nội bộ. Dùng cho quyền riêng tư, kiểm soát truy cập, công cụ bên ngoài, phản ứng sự cố, vận hành dịch vụ, quy định ticket hoặc ranh giới an toàn."
     parameters:
       type: object
       properties:
-        query: {type: string, default: "", description: "Nội dung cần tìm"}
+        query: {type: string, default: "", description: "Nội dung cần tìm trong chính sách"}
         policy_area: {type: string, enum: [all, access_control, data_privacy, external_tools, incident_response, service_operations, ticketing], default: "all", description: "Nhóm chính sách"}
-        top_k: {type: integer, default: 3, description: "Số mục"}
+        top_k: {type: integer, default: 3, description: "Số kết quả"}
       required: [query]
 
   - name: create_ticket
-    description: "Tạo một ticket hỗ trợ."
+    description: "Tạo ticket hỗ trợ sau khi người dùng đã xác nhận payload ticket. Tool này chỉ dùng để tạo ticket, không dùng cho chẩn đoán, trạng thái dịch vụ, tìm KB hoặc định dạng báo cáo."
     parameters:
       type: object
       properties:
-        summary: {type: string, default: "", description: "Tóm tắt sự cố"}
-        priority: {type: string, enum: [low, medium, high, critical], default: "medium", description: "Mức ưu tiên"}
-        asset_id: {type: string, default: "", description: "Mã tài sản nếu có"}
-        confirmed: {type: boolean, default: false, description: "Đã được người dùng xác nhận"}
+        summary: {type: string, default: "", description: "Tóm tắt ticket"}
+        priority: {type: string, enum: [low, medium, high, critical], default: "medium", description: "Mức ưu tiên của ticket"}
+        asset_id: {type: string, default: "", description: "Asset ID liên quan nếu có"}
+        confirmed: {type: boolean, default: false, description: "Người dùng đã xác nhận tạo ticket hay chưa"}
       required: [summary]
