@@ -1,1 +1,2 @@
 version,author,changed_artifact,artifact_version,prompt_hash,tools_hash,reason,hypothesis,metric_name,metric_before,metric_after,run_file
+v2,Codex,system_prompt.md,v2+p27327fc5f355+td49c512eb126,27327fc5f355,d49c512eb126,Fix missing_info by asking clarify for missing asset ID missing employee ID and ambiguous environment,Prompt missing-info rules will stop guessed IDs and enum coercion,case_accuracy / missing_info failures,0.80 / 3,0.90 / 0,runs/v2_B_base_openrouter_20260915T201056362998.json

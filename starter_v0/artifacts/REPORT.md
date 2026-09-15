@@ -52,12 +52,13 @@ total_cases`, và tool result error đã được review thủ công.
 |---|---|---|---|---:|---:|---|
 | v0 | baseline | Chạy bản starter chưa sửa để lấy lỗi gốc. | case_accuracy / wrong_tool failures |  | 0.70 / 3 | `runs/v0_B_base_openrouter_20260915T194643913280.json` |
 | v1 | Sửa `artifacts/tools.yaml`: làm rõ ranh giới `check_service_status`, `inspect_device`, `lookup_user`, `search_kb`, `format_incident_report`; chuyển description sang tiếng Việt để khớp ngôn ngữ eval. Không sửa `system_prompt.md`. | Nếu tool description nêu rõ service-wide vs asset-specific vs employee directory và yêu cầu `check` cụ thể, agent sẽ giảm chọn nhầm tool và nhầm argument do routing. | case_accuracy / wrong_tool failures | 0.70 / 3 | 0.80 / 0 | `runs/v1_B_base_openrouter_20260915T195624602380.json` |
-| v2 |  |  |  |  |  |  |
+| v2 | Sửa `artifacts/system_prompt.md`: thêm luật hỏi lại khi thiếu asset ID, thiếu employee ID hoặc environment không thuộc enum; giữ nguyên `tools.yaml` v1. | Nếu prompt cấm đoán asset/employee/environment và bắt dùng `clarify` cho input thiếu hoặc mơ hồ, agent sẽ không gọi tool downstream bằng dữ liệu tự suy đoán. | case_accuracy / missing_info failures | 0.80 / 3 | 0.90 / 0 | `runs/v2_B_base_openrouter_20260915T201056362998.json` |
 | v3 |  |  |  |  |  |  |
 
 Ghi chú v1: run hợp lệ theo điều kiện của README (`provider_error_cases == 0`,
 `measured_cases == total_cases == 30`). Sau v1 vẫn còn 6 lỗi: `missing_info` = 3
-và `wrong_boundary` = 3, đúng phạm vi để xử lý ở v2/v3.
+và `wrong_boundary` = 3. Sau v2, `missing_info` đã về 0; còn 3 lỗi
+`wrong_boundary`
 
 ## B2. Failure analysis
 
@@ -66,6 +67,9 @@ và `wrong_boundary` = 3, đúng phạm vi để xử lý ở v2/v3.
 | H04_user_routing | wrong_tool | v0 gọi `lookup_user({"employee_id":"EMP-1003"})` rồi gọi thêm `inspect_device({"asset_id":"EMP-1003"})`. | Agent nhầm employee ID thành asset ID và gọi dư `inspect_device`. | Trong `lookup_user.description`, nêu rõ EMP-* dùng cho directory record và danh sách assigned assets là đủ nếu user không yêu cầu inspect asset cụ thể. Trong `inspect_device.description`, cấm truyền EMP-* vào `asset_id`. Kết quả v1: case pass. |
 | H13_parallel_status_and_device | wrong_tool / wrong_arg_value | v0 gọi `check_service_status(vpn, production)` và `inspect_device({"asset_id":"LT-204"})` nhưng thiếu `check:"vpn"`. | Agent biết cần inspect device nhưng không map yêu cầu "VPN trên LT-204" thành diagnostic area `vpn`. | Trong `inspect_device.description`, thêm luật nếu user hỏi VPN/network/security/hardware/software thì đặt `check` đúng nhóm đó. Kết quả v1: case pass. |
 | H17_triage_with_three_sources | wrong_tool / wrong_arg_value | v0 gọi `inspect_device({"asset_id":"LT-318","check":"all"})`, `check_service_status(vpn, production)`, `search_kb(category vpn)`. | Agent gọi đúng nhóm tool nhưng inspect device quá rộng, chưa chọn `check:"vpn"` cho triage VPN. | Cùng sửa đổi ở `inspect_device.description` về `check` cụ thể; `search_kb` và `check_service_status` cũng được mô tả lại để phân biệt how-to, status và device diagnostic. Kết quả v1: case pass. |
+| H10_missing_asset | missing_info | v1 gọi `search_kb({"query":"Wi-Fi","category":"wifi"})`. | User chỉ nói "laptop của mình", chưa có asset ID cụ thể nên không đủ input để inspect device. | Trong `system_prompt.md`, thêm luật device diagnostic phải có asset ID cụ thể; nếu chỉ có thiết bị chung chung thì gọi `clarify(response_type="text")`. Kết quả v2: case pass. |
+| H11_missing_employee | missing_info | v1 gọi `lookup_user({"employee_id":"EMP-1003"})`. | User chỉ nói nhân viên bên Sales, agent tự đoán employee ID. | Trong `system_prompt.md`, thêm luật lookup tài khoản phải có mã EMP-* cụ thể; nếu chỉ có phòng ban/vai trò thì gọi `clarify(response_type="text")`. Kết quả v2: case pass. |
+| H19_ambiguous_environment | missing_info | v1 gọi `check_service_status({"service":"email","environment":"staging"})`. | User nói môi trường demo của QA, không thuộc enum `production`/`staging`; agent tự map sang staging. | Trong `system_prompt.md`, thêm luật nếu environment là demo/QA/test/sandbox thì hỏi chọn `production` hoặc `staging` bằng `clarify(response_type="choice")`. Kết quả v2: case pass. |
 
 ## B3. Team eval cases
 
