@@ -7,6 +7,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from confirmation_guard import ConfirmationGuard
 from env_loader import load_lab_env
 from providers import make_provider
 from providers.base import ToolCall
@@ -41,7 +42,7 @@ def trim_history(history: list[dict[str, str]], window: int) -> list[dict[str, s
     return history[-window * 2:]
 
 
-def execute_tool_call(call: ToolCall) -> dict[str, Any]:
+def execute_tool_call(call: ToolCall, guard: ConfirmationGuard | None = None) -> dict[str, Any]:
     func = TOOL_FUNCTIONS.get(call.name)
     if not func:
         return {
@@ -49,10 +50,16 @@ def execute_tool_call(call: ToolCall) -> dict[str, Any]:
             "args": call.args,
             "result": {"error": "unknown_tool", "message": f"No local implementation for {call.name}"},
         }
+    if guard is not None:
+        blocked = guard.check(call.name, call.args)
+        if blocked is not None:
+            return {"tool": call.name, "args": call.args, "result": blocked}
     try:
         result = func(**call.args)
     except Exception as exc:
         result = {"error": type(exc).__name__, "message": str(exc)}
+    if guard is not None:
+        guard.record(call.name, call.args, result)
     return {"tool": call.name, "args": call.args, "result": result}
 
 
@@ -84,6 +91,7 @@ def run_model_tool_loop(
     tools: list[dict[str, Any]],
     model: str | None,
     max_tool_rounds: int,
+    guard: ConfirmationGuard | None = None,
 ) -> dict[str, Any]:
     working_messages = list(messages)
     rounds: list[dict[str, Any]] = []
@@ -101,6 +109,8 @@ def run_model_tool_loop(
 
         if not calls:
             rounds.append(round_record)
+            if guard is not None:
+                guard.record_assistant_reply(response.text or "")
             return {
                 "status": "answered",
                 "assistant_text": response.text or "",
@@ -113,7 +123,8 @@ def run_model_tool_loop(
 
         for call in calls:
             print(f"[tool] {call.name}({json.dumps(call.args, ensure_ascii=True, sort_keys=True)})")
-            event = execute_tool_call(call)
+            event = execute_tool_call(call, guard)
+            print(f"[result] {json.dumps(event.get('result'), ensure_ascii=True, default=str)[:600]}")
             round_record["tool_results"].append(event)
             all_tool_events.append(event)
 
@@ -193,6 +204,7 @@ def main() -> None:
     print("Type /exit to stop.")
 
     history: list[dict[str, str]] = []
+    guard = ConfirmationGuard()
     turn_index = 0
     while True:
         try:
@@ -207,6 +219,7 @@ def main() -> None:
             break
 
         turn_index += 1
+        guard.start_user_turn(user_text)
         messages = [
             {"role": "system", "content": system_prompt},
             *trim_history(history, args.history_window),
@@ -230,6 +243,7 @@ def main() -> None:
                 tools=openai_tools,
                 model=args.model,
                 max_tool_rounds=args.max_tool_rounds,
+                guard=guard,
             )
             turn_record.update(result)
             assistant_text = result["assistant_text"]

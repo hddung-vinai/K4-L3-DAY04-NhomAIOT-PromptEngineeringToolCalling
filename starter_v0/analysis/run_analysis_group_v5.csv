@@ -1,0 +1,11 @@
+run_id,version,artifact_version,suite,case_id,is_multiturn,case_failure_type,observed_mismatch,expected_tool,actual_tool,passed,routing_correct,args_correct,failures
+v5_B_group_openai_20260916T020653211718,v5,v5+pb4bb31b15e8b+td95058bd7a3b,group,G01_policy_routing,False,wrong_tool,,policy,policy,True,True,True,
+v5_B_group_openai_20260916T020653211718,v5,v5+pb4bb31b15e8b+td95058bd7a3b,group,G02_public_device_info,False,wrong_tool,wrong_arg_value,search_device_info,search_device_info,False,True,False,"model: expected 'Dell Latitude 7440', got 'Latitude 7440'"
+v5_B_group_openai_20260916T020653211718,v5,v5+pb4bb31b15e8b+td95058bd7a3b,group,G03_printing_service_status,False,wrong_tool,,check_service_status,check_service_status,True,True,True,
+v5_B_group_openai_20260916T020653211718,v5,v5+pb4bb31b15e8b+td95058bd7a3b,group,G04_kb_printing_howto,False,wrong_tool,,search_kb,search_kb,True,True,True,
+v5_B_group_openai_20260916T020653211718,v5,v5+pb4bb31b15e8b+td95058bd7a3b,group,G05_ambiguous_priority_clarify,False,missing_info,wrong_arg_value,clarify,clarify,False,True,False,"response_type: expected 'choice', got 'yes_no'; options: expected ['low', 'medium', 'high', 'critical'], got None"
+v5_B_group_openai_20260916T020653211718,v5,v5+pb4bb31b15e8b+td95058bd7a3b,group,MG01_carry_asset_switch_check,True,missing_info,,inspect_device,inspect_device,True,True,True,
+v5_B_group_openai_20260916T020653211718,v5,v5+pb4bb31b15e8b+td95058bd7a3b,group,MG02_carry_service_switch_environment,True,wrong_arg_value,,check_service_status,check_service_status,True,True,True,
+v5_B_group_openai_20260916T020653211718,v5,v5+pb4bb31b15e8b+td95058bd7a3b,group,MG03_pause_ticket_flow,True,wrong_boundary,,no_tool,,True,True,True,
+v5_B_group_openai_20260916T020653211718,v5,v5+pb4bb31b15e8b+td95058bd7a3b,group,MG04_switch_check_field,True,wrong_arg_value,,inspect_device,inspect_device,True,True,True,
+v5_B_group_openai_20260916T020653211718,v5,v5+pb4bb31b15e8b+td95058bd7a3b,group,MG05_ticket_to_kb_switch,True,wrong_tool,,search_kb,search_kb,True,True,True,
