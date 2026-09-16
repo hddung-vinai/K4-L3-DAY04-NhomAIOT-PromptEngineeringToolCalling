@@ -17,7 +17,7 @@
 | Họ và tên | MSSV | GitHub | Vai trò và công việc | File/commit/PR |
 |---|---|---|---|---|
 | Hoàng Đức Dũng | 2A202602798 | https://github.com/hddung-vinai | Đại diện nhóm, prompt engineering lead: chạy baseline, đặt giả thuyết và sửa `system_prompt.md`/`tools.yaml` qua v1→v3, guard xác nhận v4–v5, chạy eval/probe, làm web UI và transcript, tổng hợp `version_log.csv` và `REPORT.md` | `starter_v0/artifacts/system_prompt.md`, `starter_v0/artifacts/tools.yaml`, `starter_v0/artifacts/version_log.csv`, `starter_v0/confirmation_guard.py`, `starter_v0/tests/test_confirmation_guard.py`, `starter_v0/runs/v0..v5_*.json`, `starter_v0/analysis/`, `starter_v0/web_ui.py`, `starter_v0/transcripts/`; commit `56756cb` + commit bổ sung |
-| Nguyễn Thanh Bình | 2A202602777 | https://github.com/ThanhBinh159 | Eval & safety: viết 10 case nhóm (5 một lượt + 5 nhiều lượt), kiểm thử bộ adversarial 12 case, phân tích an toàn | `starter_v0/data/eval_group.json` (được commit trong `56756cb`); chưa có commit riêng đứng tên Bình |
+| Nguyễn Thanh Bình | 2A202602777 | https://github.com/ThanhBinh159 | Eval & safety: viết 10 case nhóm (5 một lượt + 5 nhiều lượt), kiểm thử bộ adversarial 12 case, phân tích an toàn | `starter_v0/data/eval_group.json` (được commit trong `56756cb`) |
 | Hoàng Đức Minh | 2A202602362 | https://github.com/hoangminh92k3 | Dự kiến phụ trách UI & tích hợp; phần UI và transcript của bản chốt do Dũng thực hiện | Chưa có commit riêng đứng tên Minh tính đến bản chốt |
 
 ## Nhận xét chung
