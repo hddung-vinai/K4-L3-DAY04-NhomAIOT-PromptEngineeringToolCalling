@@ -286,7 +286,7 @@ repository chung:
 
 - [x] `TEAM.md` có đủ họ tên, MSSV, GitHub username và vai trò.
 - [x] Mỗi thành viên có ít nhất một commit trong lịch sử branch nộp bài.
-- [x] Phần nhận xét chung trong TEAM.md đã hoàn thành và có evidence. _(đã có bản tổng hợp số liệu; nhóm rà lại)_
+- [x] Phần nhận xét chung trong TEAM.md đã hoàn thành và có evidence.
 - [x] Mỗi thành viên đã tự viết và commit mục INDIVIDUAL trong TEAM.md.
 - [x] `system_prompt.md`, `tools.yaml`, version log, runs, eval, transcript, UI và report đã có trong repository. 
 - [x] Không có `.env`, API key, token, dữ liệu thật, cache hoặc generated ticket.

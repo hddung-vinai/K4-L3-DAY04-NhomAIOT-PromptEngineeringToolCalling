@@ -1,0 +1,35 @@
+{
+  "transcript_id": "v5_openai_ui_20260916T091452150293",
+  "version": "v5",
+  "artifact_version": "v5+pb4bb31b15e8b+td95058bd7a3b",
+  "prompt_hash": "b4bb31b15e8bc607dbafbbe643a735108fefe7ea754e036f574176dd17093fd6",
+  "tools_hash": "d95058bd7a3b3ba67a6aad848c9d32ee9bf04303648048d4b448140ceb70e09a",
+  "provider": "openai",
+  "model": "gpt-4o-mini",
+  "system_prompt": "D:\\BINBONCUTE\\VINAI\\Day 5\\K4-L3-DAY04-NhomAIOT-PromptEngineeringToolCalling\\starter_v0\\artifacts\\system_prompt.md",
+  "tools": "D:\\BINBONCUTE\\VINAI\\Day 5\\K4-L3-DAY04-NhomAIOT-PromptEngineeringToolCalling\\starter_v0\\artifacts\\tools.yaml",
+  "history_window": 5,
+  "max_tool_rounds": 4,
+  "interface": "web_ui",
+  "created_at": "2026-09-16T09:14:52",
+  "updated_at": "2026-09-16T09:15:11",
+  "turns": [
+    {
+      "turn_index": 1,
+      "started_at": "2026-09-16T09:15:07",
+      "user": "giờ tôi sửa máy tính như nào",
+      "status": "answered",
+      "assistant_text": "Tôi có thể giúp bạn tìm kiếm bài hướng dẫn sửa chữa máy tính. Bạn có thể cho tôi biết vấn đề cụ thể mà bạn đang gặp phải với máy tính của mình không?",
+      "rounds": [
+        {
+          "round": 1,
+          "assistant_text": "Tôi có thể giúp bạn tìm kiếm bài hướng dẫn sửa chữa máy tính. Bạn có thể cho tôi biết vấn đề cụ thể mà bạn đang gặp phải với máy tính của mình không?",
+          "tool_calls": [],
+          "tool_results": []
+        }
+      ],
+      "tool_events": [],
+      "ended_at": "2026-09-16T09:15:11"
+    }
+  ]
+}
