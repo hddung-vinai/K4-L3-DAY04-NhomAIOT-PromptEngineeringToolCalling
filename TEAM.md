@@ -55,8 +55,26 @@ Mỗi thành viên tự viết mục của mình. Các dòng in nghiêng là ch�
 ### Hoàng Đức Minh — 2A202602362
 
 
-- Phần việc và file/commit/PR: Phụ trách mảng UI & tích hợp của nhóm. Sản phẩm của mảng này trong bản chốt gồm: web UI `starter_v0/web_ui.py` (hiển thị tool call, input, kết quả/lỗi, trạng thái lượt và `artifact_version`, lưu transcript mỗi phiên), smoke test qua HTTP `starter_v0/scripts/ui_smoke_test.py`, kịch bản hội thoại `starter_v0/scripts/transcript_scenarios.json` và transcript trong `starter_v0/transcripts/` (5 kịch bản CLI + 1 phiên web UI trên v5). Phần hiện thực của bản chốt do Dũng làm; đóng góp riêng của Minh bổ sung sau.
-- Quyết định, khó khăn và cách xử lý: Bổ sung sau, do Minh tự viết theo [RULES.md](RULES.md).
-- Điều đã học: Bổ sung sau, do Minh tự viết theo [RULES.md](RULES.md).
-- AI/công cụ đã dùng và cách kiểm tra: Bổ sung sau, do Minh tự viết theo [RULES.md](RULES.md).
-- Thời điểm đã tự nộp URL repo chung trên VLearn: 21h 15/9/2026
+- Phần việc và file/commit/PR:
+  - **Web UI** (`starter_v0/web_ui.py`): Xây dựng Gradio Blocks UI kết nối trực tiếp với `run_model_tool_loop` từ `chat.py`. UI gồm cửa sổ chat, panel "Tool trace" hiển thị tool calls/results sau mỗi lượt, nút xoá hội thoại, và tự động lưu transcript JSON vào `transcripts/` sau mỗi turn. Hỗ trợ `--provider`, `--model`, `--version`, `--share`.
+  - **Smoke test** (`starter_v0/scripts/ui_smoke_test.py`): Script kiểm thử pipeline agent end-to-end gồm 3 cases — routing (`check_service_status`), clarify khi thiếu asset ID, và out-of-scope không gọi tool. Chạy được bằng `python scripts/ui_smoke_test.py --provider openrouter --verbose`; exit code 0 khi pass, 1 khi fail.
+  - **Transcripts** (`starter_v0/transcripts/.gitkeep`): Tạo thư mục lưu transcript với `.gitkeep` để theo dõi qua git.
+  - **Phân tích và fix lỗi eval** (`starter_v0/artifacts/system_prompt.md`, `starter_v0/artifacts/tools.yaml`): Phân tích nguyên nhân các failure type `wrong_tool` (H04, H13, H17), `missing_info` (H10, H11, H19), `wrong_boundary` (H12, M05, M09) từ kết quả run eval. Viết fix có hypothesis rõ ràng, giữ code cũ dưới dạng comment `[v0]` trước khi thay thế.
+
+- Quyết định, khó khăn và cách xử lý:
+  - **Web UI không dùng `agent.run()` trực tiếp** mà dùng `run_model_tool_loop` từ `chat.py` — vì `agent.run()` chỉ làm 1 tool round, trong khi UI cần xử lý clarify (tool loop dừng lại chờ user) và multi-round. Quyết định này giữ consistency với `chat.py`.
+  - **Gradio `type="messages"`** thay vì `type="tuples"` (deprecated trong Gradio 4+): tránh warning và tương thích với Gradio 6.
+  - **Fix `wrong_boundary` sau khi fix `missing_info` làm M05 tệ hơn**: Xác định root cause là `clarify` description quá ngắn khiến LLM không biết dùng `yes_no` cho ticket. Fix bằng cách mô tả rõ 3 `response_type` trong description của tool `clarify`, đồng thời liệt kê các phrase trigger Step 1 trong `system_prompt.md` (tiếng Việt cụ thể như "cho mình xem lại và hỏi xác nhận").
+  - **Bỏ `default: "production"` trong `environment`** để LLM không fall back im lặng khi gặp "demo", "QA" — thay vào đó phải gọi `clarify(choice)`. Kiểm tra collision: tất cả 7 cases dùng `check_service_status` đều có environment rõ ràng trong query hoặc carry từ turn trước, nên bỏ default an toàn.
+
+- Điều đã học:
+  - Tool description trong `tools.yaml` ảnh hưởng trực tiếp đến routing của LLM — description ngắn và thiếu boundary conditions là nguyên nhân chính của các failure type `wrong_tool` và `missing_info`. Cải thiện description cụ thể hơn default behavior giúp tăng accuracy rõ rệt.
+  - Khi fix một failure type cần kiểm tra collision với các cases khác trước khi áp dụng — fix `missing_info` có thể làm hỏng `wrong_boundary` nếu không cẩn thận về scope của rule.
+  - `run_model_tool_loop` trong `chat.py` detect clarify tool qua `result.get("awaiting_user")` thay vì hard-code tên tool — pattern này rename-proof và nên giữ nhất quán trong web_ui.
+
+- AI/công cụ đã dùng và cách kiểm tra:
+  - Dùng **Kiro (AI IDE)** để phân tích codebase (`agent.py`, `chat.py`, `run_eval.py`), đề xuất fix hypothesis, và viết code cho `web_ui.py` và `ui_smoke_test.py`.
+  - Kiểm tra: chạy `python scripts/ui_smoke_test.py --provider openrouter --verbose` — kết quả 3/3 PASS, exit code 0. Tool calls khớp với expected: `check_service_status(vpn, production)`, `clarify(text)`, no-tool cho out-of-scope.
+  - Mọi fix `system_prompt.md` và `tools.yaml` được đối chiếu thủ công với từng case trong `eval_base.json` trước khi áp dụng để tránh regression.
+
+- Thời điểm đã tự nộp URL repo chung trên VLearn: 10h30 16/09/2026
