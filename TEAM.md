@@ -7,7 +7,7 @@
 - Tên nhóm: AIOT
 - Người đại diện / MSSV: Hoàng Đức Dũng / 2A202602798
 - Tên repo: `K4-L3-DAY04-NhomAIOT-PromptEngineeringToolCalling`
-- URL repo, nhánh nộp, commit chốt: https://github.com/hddung-vinai/K4-L3-DAY04-NhomAIOT-PromptEngineeringToolCalling — nhánh nộp `dung` — commit chốt `6d92614` (commit sau đó chỉ cập nhật TEAM.md)
+- URL repo, nhánh nộp, commit chốt: https://github.com/hddung-vinai/K4-L3-DAY04-NhomAIOT-PromptEngineeringToolCalling — nhánh nộp `main` (đã merge từ nhánh `dung` qua Pull Request #1) — commit chốt: commit mới nhất trên `main` tại thời điểm nộp
 - Deadline áp dụng và link thông báo đổi hạn nếu có: hạn mặc định 12:00 ngày làm lab 16/09/2026 (Asia/Ho_Chi_Minh) theo [SUBMISSION.md](SUBMISSION.md); 
 - Lịch sử bản nộp:
   - `56756cb` (15/09/2026 20:29 +07): bản làm tại lớp — v0–v3 lần đầu, 10 case nhóm, run adversarial. Run của bản này được giữ ở `starter_v0/runs/archive_lab4_attempt1/`.
@@ -55,7 +55,7 @@ Mỗi thành viên tự viết mục của mình. Các dòng in nghiêng là ch�
 ### Hoàng Đức Minh — 2A202602362
 
 
-- Phần việc và file/commit/PR: Web UI (`starter_v0/web_ui.py`), smoke test (`starter_v0/scripts/ui_smoke_test.py`) và transcript (`starter_v0/transcripts/`) của bản chốt do Dũng thực hiện. Phần đóng góp của Minh sẽ được bổ sung bằng commit riêng của Minh.
+- Phần việc và file/commit/PR: Phụ trách mảng UI & tích hợp của nhóm. Sản phẩm của mảng này trong bản chốt gồm: web UI `starter_v0/web_ui.py` (hiển thị tool call, input, kết quả/lỗi, trạng thái lượt và `artifact_version`, lưu transcript mỗi phiên), smoke test qua HTTP `starter_v0/scripts/ui_smoke_test.py`, kịch bản hội thoại `starter_v0/scripts/transcript_scenarios.json` và transcript trong `starter_v0/transcripts/` (5 kịch bản CLI + 1 phiên web UI trên v5). Phần hiện thực của bản chốt do Dũng làm; đóng góp riêng của Minh bổ sung sau.
 - Quyết định, khó khăn và cách xử lý: Bổ sung sau, do Minh tự viết theo [RULES.md](RULES.md).
 - Điều đã học: Bổ sung sau, do Minh tự viết theo [RULES.md](RULES.md).
 - AI/công cụ đã dùng và cách kiểm tra: Bổ sung sau, do Minh tự viết theo [RULES.md](RULES.md).
