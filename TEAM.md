@@ -16,9 +16,9 @@
 
 | Họ và tên | MSSV | GitHub | Vai trò và công việc | File/commit/PR |
 |---|---|---|---|---|
-| Hoàng Đức Dũng | 2A202602798 | https://github.com/hddung-vinai | Đại diện nhóm, prompt engineering lead: chạy baseline, đặt giả thuyết và sửa `system_prompt.md`/`tools.yaml` qua v1→v3, guard xác nhận v4–v5, chạy eval/probe, tổng hợp `version_log.csv` và `REPORT.md` | `starter_v0/artifacts/system_prompt.md`, `starter_v0/artifacts/tools.yaml`, `starter_v0/artifacts/version_log.csv`, `starter_v0/confirmation_guard.py`, `starter_v0/tests/test_confirmation_guard.py`, `starter_v0/runs/v0..v5_*.json`, `starter_v0/analysis/`; commit `56756cb` + commit bổ sung |
+| Hoàng Đức Dũng | 2A202602798 | https://github.com/hddung-vinai | Đại diện nhóm, prompt engineering lead: chạy baseline, đặt giả thuyết và sửa `system_prompt.md`/`tools.yaml` qua v1→v3, guard xác nhận v4–v5, chạy eval/probe, làm web UI và transcript, tổng hợp `version_log.csv` và `REPORT.md` | `starter_v0/artifacts/system_prompt.md`, `starter_v0/artifacts/tools.yaml`, `starter_v0/artifacts/version_log.csv`, `starter_v0/confirmation_guard.py`, `starter_v0/tests/test_confirmation_guard.py`, `starter_v0/runs/v0..v5_*.json`, `starter_v0/analysis/`, `starter_v0/web_ui.py`, `starter_v0/transcripts/`; commit `56756cb` + commit bổ sung |
 | Nguyễn Thanh Bình | 2A202602777 | https://github.com/ThanhBinh159 | Eval & safety: viết 10 case nhóm (5 một lượt + 5 nhiều lượt), kiểm thử bộ adversarial 12 case, phân tích an toàn | `starter_v0/data/eval_group.json` (được commit trong `56756cb`); chưa có commit riêng đứng tên Bình |
-| Hoàng Đức Minh | 2A202602362 | https://github.com/hoangminh92k3 | UI & tích hợp: chat UI hiển thị tool call/input/kết quả-lỗi/version, transcript hội thoại demo | UI và transcript hiện có (`starter_v0/web_ui.py`, `starter_v0/scripts/ui_smoke_test.py`, `starter_v0/transcripts/`) do Dũng thực hiện; chưa có commit riêng đứng tên Minh |
+| Hoàng Đức Minh | 2A202602362 | https://github.com/hoangminh92k3 | Dự kiến phụ trách UI & tích hợp; phần UI và transcript của bản chốt do Dũng thực hiện | Chưa có commit riêng đứng tên Minh tính đến bản chốt |
 
 ## Nhận xét chung
 - Kết quả và bằng chứng: bộ base 30 câu `case_accuracy` v0 0.70 → v1 0.8667 → v2 0.9667 → v3 0.9667, giữ 0.9667 ở v4, v5 (`starter_v0/artifacts/version_log.csv`, REPORT mục B1). Bộ adversarial 12 câu: v3 0.6667 và **2 ticket thật bị tạo do tấn công** → v5 0.75 và **0 lệnh ghi do tấn công** (REPORT B4a). Bộ 10 case nhóm trên v5: 0.80 (REPORT B3). Transcript: 5 kịch bản CLI và 1 phiên web UI trên v5 (REPORT B4).
@@ -55,8 +55,8 @@ Mỗi thành viên tự viết mục của mình. Các dòng in nghiêng là ch�
 ### Hoàng Đức Minh — 2A202602362
 
 
-- Phần việc và file/commit/PR: Tính đến bản chốt ngày 16/09, Minh chưa có commit kỹ thuật riêng trong repo. Phần UI và transcript đang có trong repo (`starter_v0/web_ui.py`, `starter_v0/scripts/ui_smoke_test.py`, `starter_v0/transcripts/`) do Dũng thực hiện, xem mục Nhận xét chung.
-- Quyết định, khó khăn và cách xử lý: Chưa có phần tự viết của Minh tại thời điểm chốt bài.
-- Điều đã học: Chưa có phần tự viết của Minh tại thời điểm chốt bài.
-- AI/công cụ đã dùng và cách kiểm tra: Chưa có phần tự viết của Minh tại thời điểm chốt bài.
+- Phần việc và file/commit/PR: Web UI (`starter_v0/web_ui.py`), smoke test (`starter_v0/scripts/ui_smoke_test.py`) và transcript (`starter_v0/transcripts/`) của bản chốt do Dũng thực hiện. Phần đóng góp của Minh sẽ được bổ sung bằng commit riêng của Minh.
+- Quyết định, khó khăn và cách xử lý: Bổ sung sau, do Minh tự viết theo [RULES.md](RULES.md).
+- Điều đã học: Bổ sung sau, do Minh tự viết theo [RULES.md](RULES.md).
+- AI/công cụ đã dùng và cách kiểm tra: Bổ sung sau, do Minh tự viết theo [RULES.md](RULES.md).
 - Thời điểm đã tự nộp URL repo chung trên VLearn: 21h 15/9/2026
